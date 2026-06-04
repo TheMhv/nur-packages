@@ -31,6 +31,14 @@ in
       description = "Directory for LazyLibrarian's data.";
     };
 
+    group = lib.mkOption {
+      type = lib.types.str;
+      default = "lazylibrarian";
+      description = ''
+        Group under which LazyLibrarian runs.
+      '';
+    };
+
     settings = mkOption {
       description = "Values that are passed to config.ini. Check https://lazylibrarian.gitlab.io/";
       default = { };
@@ -49,13 +57,15 @@ in
   config = lib.mkIf cfg.enable {
     users.users.lazylibrarian = {
       isSystemUser = true;
-      group = "lazylibrarian";
+      group = cfg.group;
       home = cfg.dataDir;
       createHome = true;
       description = "LazyLibrarian service user";
     };
 
-    users.groups.lazylibrarian = { };
+    users.groups = lib.mkIf (cfg.group == "lazylibrarian") {
+      lazylibrarian = { };
+    };
 
     systemd.services.lazylibrarian = {
       description = "LazyLibrarian ebook/audiobook manager";
@@ -77,7 +87,7 @@ in
 
       serviceConfig = {
         User = "lazylibrarian";
-        Group = "lazylibrarian";
+        Group = cfg.group;
         StateDirectory = "lazylibrarian";
         StateDirectoryMode = "0750";
         ReadWritePaths = [ cfg.dataDir ];

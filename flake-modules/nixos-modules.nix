@@ -1,7 +1,7 @@
 { lib, ... }:
 let
   module_dir = ../nixos-modules;
-  modules = builtins.readDir module_dir |> builtins.attrNames;
+  modules = builtins.attrNames (builtins.readDir module_dir);
   module_names = map (lib.removeSuffix ".nix") modules;
   module_paths = map (name: lib.path.append module_dir name) modules;
 
